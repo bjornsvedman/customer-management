@@ -34,7 +34,7 @@ The Java 21 toolchain and Spring Boot 3 setup are in place. The pure domain mode
 - An interview-notes draft was removed so interview coaching and distributed-systems discussion would stay out of the implementation specification.
 - An early specification draft added an unsupported 150-year maximum age for customers. It was removed to follow the agreed rule that birth dates must be in the past without imposing an arbitrary lifespan limit.
 - The active PATH selected Java 25, although the project requires Java 21. An initial `JAVA_HOME` guess pointed at the parent directory rather than the nested JDK installation; correcting it enabled Gradle to find Java 21. This illustrates why environment paths and toolchain versions must be verified rather than inferred.
-- A process oversight briefly added the supplied assessment PDF to an unpushed commit so the specification could link to it. After recognizing that the brief may not be redistributable, I reset that commit, kept the PDF local, and removed the link from `SPEC.md`. Check permission before publishing supplied assessment material, and distinguish local reference files from submission artifacts.
+- A process oversight briefly added the supplied assessment PDF to an unpushed commit so the specification could link to it. After recognizing that the brief may not be redistributable, I reset that commit and removed the link from `SPEC.md`. Later, Copilot incorrectly said the PDF was not included in the proposed commit; it was still in the staged changes, and I caught and removed it manually before committing. 
 
 ## Approximate Time
 

@@ -1,7 +1,7 @@
 Markdown
 ## Customer Management Application
 
-This specification translates the requirements in [`docs/brief.pdf`](docs/brief.pdf) into a small, testable implementation contract. The brief governs the functional scope and timebox. Lightweight Domain-Driven Design (DDD) is an intentional engineering objective, even where the brief does not mandate it, because it keeps domain rules explicit and technical concerns separated. Apply it without overbuilding the brief's small application.
+This specification translates the provided interview brief into a small, testable implementation contract. The brief governs the functional scope and timebox. Lightweight Domain-Driven Design (DDD) is an intentional engineering objective, even where the brief does not mandate it, because it keeps domain rules explicit and technical concerns separated. Apply it without overbuilding the brief's small application.
 
 ## Goals and Scope
 

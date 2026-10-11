@@ -12,19 +12,22 @@ AI assistance:
 - Assisted with Java 21 setup and Gradle verification.
 - Compared the interview brief with the project specification and drafted documentation covering scope, API behavior, Lightweight DDD boundaries, and setup.
 - Generated the initial pure-Java `CustomerId`, `PersonName`, and `BirthDate` value objects, the `Customer` aggregate, and focused JUnit tests. Updated birth-date validation and tests to use UTC.
+- Implemented the domain `CustomerRepository` contract, transactional application service, JPA entity and persistence adapter, validated POST DTO/controller, UTC validation clock, and RFC 7807 error handling for customer creation.
+- Added MockMvc integration tests that verify successful H2 persistence, generated IDs and `Location`, and that invalid requests do not persist.
 
 Human-owned work:
 - Set the Spring Boot 3.x requirement, completed the earlier infrastructure work and commits, and chose Lightweight DDD as an intentional interview focus.
 
 ## Current Status
 
-The Java 21 toolchain and Spring Boot 3 setup are in place. The pure domain model and its unit tests are implemented and passing. Application use cases, the domain repository interface, persistence mapping, REST API, and customer UI are not implemented yet. The next planned slice is the repository contract, application service, and persistence adapter, with tests for those boundaries.
+The Java 21 toolchain and Spring Boot 3 setup are in place. The pure domain model, domain repository contract, create-customer application use case, H2 persistence adapter, and `POST /api/v1/customers` endpoint are implemented. Domain and full backend tests pass. Customer retrieval endpoints and the customer UI remain to be implemented.
 
 ## Validation
 
 - Confirmed the Gradle Java toolchain is configured for Java 21 and identified Temurin Java 21 on the machine.
 - `gradlew.bat help` and `gradlew.bat test` passed during the Spring Boot 3 infrastructure work.
 - The focused customer-domain JUnit tests and the full backend test suite passed with Java 21 selected through `JAVA_HOME`, including the UTC birth-date tests.
+- Manually sent a valid `POST /api/v1/customers` request from Postman and confirmed the endpoint worked outside the automated test environment.
 - `npm --prefix frontend run lint` passed; no frontend files were changed during the domain work.
 - VS Code reported no diagnostics for the edited specification and domain files. Markdown checks for balanced fences, local links, and trailing whitespace passed.
 - An initial backend baseline attempt ran under Java 25 while Gradle required Java 21 and failed to locate a matching toolchain. After locating the installed Java 21 distribution and setting `JAVA_HOME`, the tests passed.
@@ -45,7 +48,8 @@ These retrospective estimates were not measured with a timer. The without-AI col
 | Spring Boot alignment and Java 21 setup | 15-25 min | 50-85 min |
 | Brief review, specification, and setup documentation | 20-35 min | 60-100 min |
 | Domain model, tests, and verification | 15-25 min | 45-75 min |
-| **Estimated total** | **50-85 min** | **155-260 min** |
+| POST API, H2 persistence, and integration tests | 20-30 min | 60-90 min |
+| **Estimated total** | **70-115 min** | **215-350 min** |
 
 ## Reflection
 

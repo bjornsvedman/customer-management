@@ -17,6 +17,7 @@ AI assistance:
 
 Human-owned work:
 - Set the Spring Boot 3.x requirement, completed the earlier infrastructure work and commits, and chose Lightweight DDD as an intentional interview focus.
+- Inspected the Gradle dependencies, noticed Lombok was configured but unused in the source, and asked Copilot to remove its dependencies.
 
 ## Current Status
 

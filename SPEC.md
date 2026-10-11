@@ -70,6 +70,12 @@ The React and TypeScript client provides a customer creation form and a list of 
 
 Use the Vite development proxy for `/api` requests to the local Spring Boot server so development does not depend on permissive cross-origin settings.
 
+- **Refresh behavior:** Refreshing the customer list preserves existing records while loading. If refresh fails, keep them visible and offer retry.
+- **Date display:** Treat birth dates as date-only values, without timezone conversion.
+- **Accessibility:** Use semantic table headings, keyboard-accessible controls, visible focus indicators, and accessible loading/error feedback.
+
+Use a restrained, Allica-inspired visual style suitable for customer-management work, without implying the application is an official Allica product.
+
 ## Architecture
 
 Keep the dependency direction `REST / infrastructure -> application -> domain`. The domain must not depend on Spring, JPA, Hibernate, Jackson, or HTTP types.

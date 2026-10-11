@@ -23,7 +23,7 @@ npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. The frontend will use a `/api` development proxy to reach Spring Boot; configure it as part of the frontend implementation. The API base path is `/api/v1/customers`. H2 is in-memory, so records are cleared when the backend stops.
+Open the local URL printed by Vite. The frontend uses a `/api` development proxy to reach Spring Boot at `http://localhost:8080` and displays the customer list with a refresh/retry control. Customer creation in the UI is not implemented yet; create records through the API to populate the list. The API base path is `/api/v1/customers`. H2 is in-memory, so records are cleared when the backend stops.
 
 ## Verify
 

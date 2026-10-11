@@ -10,11 +10,14 @@ h1 { font-size: 32px; line-height: 1.2; font-weight: 700; }
 .creation-section { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 32px; }
 .creation-section h2 { font-size: 22px; margin-bottom: 20px; }
 .creation-section fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
-.form-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-bottom: 20px; }
+.form-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 20px; margin-bottom: 20px; }
 .form-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .form-field label { font-size: 14px; font-weight: 600; }
 .form-field input { width: 100%; min-width: 0; min-height: 44px; border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; font: inherit; color: var(--navy); background: white; outline-offset: 4px; }
 .form-field input:disabled { background: #eceff3; color: var(--muted); }
+.form-field input[aria-invalid="true"] { border-color: #b42318; }
+.field-error { color: #8a1c13; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.creation-section .error-message { margin-top: 12px; }
 .creation-status { min-height: 24px; margin: 12px 0 0; color: var(--muted); font-size: 14px; }
 button { background: var(--orange); color: var(--navy); border: 1px solid #c55812; border-radius: 4px; min-width: 108px; min-height: 44px; padding: 10px 18px; font-weight: 700; cursor: pointer; }
 button:hover:not(:disabled) { background: #f7944d; }

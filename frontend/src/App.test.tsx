@@ -1,4 +1,5 @@
 import { StrictMode } from 'react'
+import { AxiosError, AxiosHeaders } from 'axios'
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -6,7 +7,7 @@ import App from './App'
 import { createCustomer, getCustomers } from './api'
 import type { CustomerResponse } from './types'
 
-vi.mock('./api', () => ({ getCustomers: vi.fn(), createCustomer: vi.fn() }))
+vi.mock('./api', async importOriginal => ({ ...await importOriginal<typeof import('./api')>(), getCustomers: vi.fn(), createCustomer: vi.fn() }))
 
 const existingCustomer: CustomerResponse = { id: 1, firstName: 'Viper', lastName: 'Napuatzi', dateOfBirth: '1985-04-12' }
 const newCustomer: CustomerResponse = { id: 2, firstName: 'Ada', lastName: 'Lovelace', dateOfBirth: '1990-12-10' }
@@ -148,5 +149,64 @@ describe('customer creation', () => {
     render(<StrictMode><App /></StrictMode>)
     await screen.findByText('Viper')
     expect(screen.queryByRole('alert')).toBeNull()
+  })
+})
+
+describe('customer validation', () => {
+  it('shows required errors, blocks POST, and focuses the first invalid field', async () => {
+    render(<App />)
+    await screen.findByText('Viper')
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Create customer' }))
+    expect(screen.getByText('First name is required.')).toBeDefined()
+    expect(screen.getByText('Last name is required.')).toBeDefined()
+    expect(screen.getByText('Birth date is required.')).toBeDefined()
+    expect(createCustomer).not.toHaveBeenCalled()
+    expect(document.activeElement).toBe(screen.getByLabelText('First name'))
+    expect(screen.getByLabelText('First name').getAttribute('aria-describedby')).toBe('first-name-error')
+    expect(screen.getByLabelText('First name').getAttribute('aria-invalid')).toBe('true')
+    expect(screen.getByText('Viper')).toBeDefined()
+  })
+
+  it('explains a future date and clears its error without stealing focus while editing', async () => {
+    render(<App />)
+    await screen.findByText('Viper')
+    const user = await fillForm()
+    fireEvent.change(screen.getByLabelText('Birth date'), { target: { value: '9999-12-31' } })
+    await user.click(screen.getByRole('button', { name: 'Create customer' }))
+    expect(screen.getByText('Birth date must be before today.')).toBeDefined()
+    expect(createCustomer).not.toHaveBeenCalled()
+    expect(document.activeElement).toBe(screen.getByLabelText('Birth date'))
+    expectFormValues('Ada', 'Lovelace', '9999-12-31')
+    fireEvent.change(screen.getByLabelText('Birth date'), { target: { value: '1990-12-10' } })
+    expect(screen.queryByText('Birth date must be before today.')).toBeNull()
+    expect(screen.getByLabelText('Birth date').getAttribute('aria-invalid')).toBe('false')
+    expect(document.activeElement).toBe(screen.getByLabelText('Birth date'))
+    vi.mocked(getCustomers).mockResolvedValue([newCustomer, existingCustomer])
+    await user.click(screen.getByRole('button', { name: 'Create customer' }))
+    await screen.findByText('Ada')
+    expect(createCustomer).toHaveBeenCalledTimes(1)
+  })
+
+  it('maps backend field errors, keeps entries and rows, and allows corrected resubmission', async () => {
+    const failure = new AxiosError('Bad request')
+    failure.response = { status: 400, statusText: 'Bad Request', headers: {}, config: { headers: new AxiosHeaders() },
+      data: { title: 'Validation failed', errors: [{ field: 'lastName', message: 'Last name was rejected.' }, { field: 'firstName', message: 'First name was rejected.' }] } }
+    vi.mocked(createCustomer).mockRejectedValueOnce(failure)
+    render(<App />)
+    await screen.findByText('Viper')
+    const user = await fillForm()
+    await user.click(screen.getByRole('button', { name: 'Create customer' }))
+    await screen.findByText('First name was rejected.')
+    expect(document.activeElement).toBe(screen.getByLabelText('First name'))
+    expectFormValues()
+    expect(screen.getByText('Viper')).toBeDefined()
+    await user.type(screen.getByLabelText('First name'), ' Jane')
+    expect(screen.queryByText('First name was rejected.')).toBeNull()
+    expect(screen.getByText('Last name was rejected.')).toBeDefined()
+    expect(document.activeElement).toBe(screen.getByLabelText('First name'))
+    await user.click(screen.getByRole('button', { name: 'Create customer' }))
+    await waitFor(() => expectFormValues('', '', ''))
+    expect(screen.queryByText('Last name was rejected.')).toBeNull()
+    expect(createCustomer).toHaveBeenCalledTimes(2)
   })
 })

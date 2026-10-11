@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { createCustomer, getCustomers } from './api'
-import type { CreateCustomerRequest, CustomerResponse } from './types'
+import { createCustomer, getCreationFailure, getCustomers } from './api'
+import type { CreateCustomerRequest, CustomerFieldErrors, CustomerResponse } from './types'
+import { customerFields, validateCustomer } from './validation'
 import './App.css'
 
 const emptyForm: CreateCustomerRequest = { firstName: '', lastName: '', dateOfBirth: '' }
@@ -16,6 +17,28 @@ function App() {
   const [creationError, setCreationError] = useState<string | null>(null)
   const [creationStatus, setCreationStatus] = useState('')
   const submissionPending = useRef(false)
+  const [fieldErrors, setFieldErrors] = useState<CustomerFieldErrors>({})
+  const formElement = useRef<HTMLFormElement>(null)
+  const pendingFocus = useRef<keyof CreateCustomerRequest | null>(null)
+
+  useEffect(() => {
+    if (submitting || !pendingFocus.current) return
+    const input = formElement.current?.elements.namedItem(pendingFocus.current)
+    if (input instanceof HTMLInputElement) input.focus()
+    pendingFocus.current = null
+  }, [fieldErrors, submitting])
+
+  function updateField(field: keyof CreateCustomerRequest, value: string) {
+    setForm(previous => ({ ...previous, [field]: value }))
+    setFieldErrors(previous => ({ ...previous, [field]: undefined }))
+    setCreationError(null)
+    setCreationStatus('')
+  }
+
+  function showFieldErrors(errors: CustomerFieldErrors) {
+    pendingFocus.current = customerFields.find(field => errors[field]) ?? null
+    setFieldErrors(errors)
+  }
 
   useEffect(() => {
     const controller = new AbortController()
@@ -59,14 +82,22 @@ function App() {
   async function submitCustomer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (submissionPending.current) return
-    submissionPending.current = true
-    setSubmitting(true)
     setCreationError(null)
     setCreationStatus('')
+    const errors = validateCustomer(form)
+    showFieldErrors(errors)
+    if (Object.keys(errors).length > 0) {
+      setCreationError('Please correct the highlighted fields.')
+      return
+    }
+    submissionPending.current = true
+    setSubmitting(true)
     try {
       await createCustomer({ ...form, firstName: form.firstName.trim(), lastName: form.lastName.trim() })
-    } catch {
-      setCreationError('Creation could not be confirmed. Your entries have been kept. Check the customer list before trying again.')
+    } catch (failure: unknown) {
+      const result = getCreationFailure(failure)
+      showFieldErrors(result.fieldErrors)
+      setCreationError(result.message)
       submissionPending.current = false
       setSubmitting(false)
       return
@@ -88,21 +119,24 @@ function App() {
       <main id="customers">
         <section className="creation-section" aria-labelledby="create-heading">
           <h2 id="create-heading">Create customer</h2>
-          <form onSubmit={event => void submitCustomer(event)} aria-busy={submitting}>
+          <form ref={formElement} onSubmit={event => void submitCustomer(event)} aria-busy={submitting} noValidate>
             <fieldset disabled={submitting}>
               <legend className="sr-only">Customer details</legend>
               <div className="form-fields">
                 <div className="form-field">
                   <label htmlFor="first-name">First name</label>
-                  <input id="first-name" name="firstName" autoComplete="given-name" required value={form.firstName} onChange={event => setForm({ ...form, firstName: event.target.value })} />
+                  <input id="first-name" name="firstName" autoComplete="given-name" required aria-invalid={Boolean(fieldErrors.firstName)} aria-describedby={fieldErrors.firstName ? 'first-name-error' : undefined} value={form.firstName} onChange={event => updateField('firstName', event.target.value)} />
+                  {fieldErrors.firstName && <p id="first-name-error" className="field-error">{fieldErrors.firstName}</p>}
                 </div>
                 <div className="form-field">
                   <label htmlFor="last-name">Last name</label>
-                  <input id="last-name" name="lastName" autoComplete="family-name" required value={form.lastName} onChange={event => setForm({ ...form, lastName: event.target.value })} />
+                  <input id="last-name" name="lastName" autoComplete="family-name" required aria-invalid={Boolean(fieldErrors.lastName)} aria-describedby={fieldErrors.lastName ? 'last-name-error' : undefined} value={form.lastName} onChange={event => updateField('lastName', event.target.value)} />
+                  {fieldErrors.lastName && <p id="last-name-error" className="field-error">{fieldErrors.lastName}</p>}
                 </div>
                 <div className="form-field">
                   <label htmlFor="birth-date">Birth date</label>
-                  <input id="birth-date" name="dateOfBirth" type="date" autoComplete="bday" required value={form.dateOfBirth} onChange={event => setForm({ ...form, dateOfBirth: event.target.value })} />
+                  <input id="birth-date" name="dateOfBirth" type="date" autoComplete="bday" required aria-invalid={Boolean(fieldErrors.dateOfBirth)} aria-describedby={fieldErrors.dateOfBirth ? 'birth-date-error' : undefined} value={form.dateOfBirth} onChange={event => updateField('dateOfBirth', event.target.value)} />
+                  {fieldErrors.dateOfBirth && <p id="birth-date-error" className="field-error">{fieldErrors.dateOfBirth}</p>}
                 </div>
               </div>
               <button type="submit" disabled={submitting}>{submitting ? 'Creating...' : 'Create customer'}</button>

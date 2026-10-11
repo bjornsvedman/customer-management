@@ -1,6 +1,9 @@
-export interface CustomerResponse {
-  id: number
+export interface CreateCustomerRequest {
   firstName: string
   lastName: string
   dateOfBirth: string
+}
+
+export interface CustomerResponse extends CreateCustomerRequest {
+  id: number
 }

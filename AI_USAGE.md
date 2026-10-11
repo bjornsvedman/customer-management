@@ -2,7 +2,7 @@
 ## AI Tools
 
 - GitHub Copilot in VS Code was the AI coding assistant used for repository review, documentation, domain code, tests, and build verification.
-- The project owner supplied feedback generated with Gemini on the implementation plan. Copilot evaluated it against the repository rules and specification; Gemini did not directly modify this repository.
+- I supplied feedback generated with Gemini on the implementation plan. Copilot evaluated it against the repository rules and specification; Gemini did not directly modify this repository.
 - ChatGPT and Claude were not used.
 
 ## AI-Assisted Work and Human Ownership
@@ -17,6 +17,7 @@ AI assistance:
 - Implemented `GET /api/v1/customers/{id}` through the domain repository contract, application service, persistence mapping, REST controller, and RFC 7807 handling for missing, malformed, and non-positive IDs. Added integration coverage that follows the POST response's `Location` with GET.
 - Implemented `GET /api/v1/customers` with descending ID order, a read-only application transaction, and shared mapping from JPA entities to domain customers. Added integration tests for empty lists, POST-created customers appearing newest-first, and repeated reads leaving storage unchanged.
 - Implemented the read-only React customer list with typed Axios requests, a Vite API proxy, cancellation handling, refresh/retry states, accessible table markup, date-only display, and responsive Allica-inspired styling.
+- Added the customer creation form and typed POST request, pending-submit guard, success-only clearing, preserved entries on failure, and post-creation list refresh with stale-read cancellation. Added Vitest, Testing Library, and jsdom for focused creation tests. Field-level validation and further polish remain for the next slice.
 
 Human-owned work:
 - Set the Spring Boot 3.x requirement, completed the earlier infrastructure work and commits, and chose Lightweight DDD as an intentional interview focus.
@@ -26,7 +27,7 @@ Human-owned work:
 
 ## Current Status
 
-The Java 21 toolchain and Spring Boot 3 setup are in place. The pure domain model, H2 persistence adapter, `POST /api/v1/customers`, `GET /api/v1/customers/{id}`, and `GET /api/v1/customers` are implemented. The read-only customer UI is implemented; the customer creation form remains to be implemented.
+The Java 21 toolchain and Spring Boot 3 setup are in place. The pure domain model, H2 persistence adapter, `POST /api/v1/customers`, `GET /api/v1/customers/{id}`, and `GET /api/v1/customers` are implemented. The customer list and creation form are implemented; backend field-error display, stronger client validation, and further polish remain to be implemented.
 
 ## Validation
 
@@ -36,6 +37,7 @@ The Java 21 toolchain and Spring Boot 3 setup are in place. The pure domain mode
 - GET-by-ID integration tests and full backend test suite passed, Verified manually in Postman
 - The focused customer-list integration tests and full `gradlew.bat test` suite passed after implementing descending ID order. The tests verify `200` JSON responses, empty arrays, all persisted customer fields, newest-first ordering, and unchanged storage after repeated GET requests.
 - Frontend lint and production build passed for the read-only customer screen. Playwright checks with intercepted API responses verified initial loading, populated and empty lists, retained rows during refresh/failure, disabled overlapping refresh, retry recovery, and long-name wrapping at desktop/mobile sizes. Screenshots were inspected and button/secondary-text contrast checked. The live API request through the proxy returned HTTP 500, so successful live backend-to-UI retrieval remains unverified; the UI showed its error state correctly.
+- Frontend slice: Create Customers, AI ran the frontend checks and tested customer creation and recovery. I also added a customer manually and confirmed it appeared in the list.
 - Manually sent a valid `POST /api/v1/customers` request from Postman and confirmed the endpoint worked outside the automated test environment.
 - `npm --prefix frontend run lint` passed; no frontend files were changed during the domain work.
 - VS Code reported no diagnostics for the edited specification and domain files. Markdown checks for balanced fences, local links, and trailing whitespace passed.

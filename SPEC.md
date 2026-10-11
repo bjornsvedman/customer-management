@@ -59,7 +59,7 @@ Invalid JSON, missing or invalid fields, and future dates return `400 Bad Reques
 
 ### Retrieve customers
 
-- `GET /api/v1/customers` returns `200 OK` and a JSON array of customer representations ordered by `id` ascending. An empty database returns an empty array.
+- `GET /api/v1/customers` returns `200 OK` and a JSON array of customer representations ordered by `id` descending, so the newest customer appears first. An empty database returns an empty array.
 - `GET /api/v1/customers/{id}` returns `200 OK` and the customer representation, or `404 Not Found` as an RFC 7807 `ProblemDetail` response when no customer exists for that identifier.
 
 The H2 database is in-memory: data remains available across requests while the application is running and is lost when it stops. Do not expose persistence entities from the API.

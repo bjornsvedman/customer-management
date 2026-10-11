@@ -45,7 +45,12 @@ npm run build
 - Use the repository's existing Java 21, Spring Boot 3.5, Gradle, React 19, TypeScript, Vite, and H2 stack, all compatible with the brief's preferences or accepted alternatives.
 - Keep domain rules independent from Spring and persistence; map domain objects to JPA entities and API records at their respective boundaries.
 - Use H2 in-memory persistence to satisfy the brief's lightweight persistence requirement; durable storage is intentionally out of scope.
+- Return customers ordered by descending ID so that after creation and a list refresh, the newest customer appears first and is easy to confirm. (Spec Change)
 - Validate customer names and birth dates at the API and domain boundaries, return RFC 7807 problem responses for expected API errors, and cover behavior with focused backend and frontend checks.
+
+## Production Considerations
+
+- Duplicate prevention is not implemented. Name and date of birth alone cannot reliably identify a person, so rejecting matching records could block legitimate customers. A production system would need an agreed identity key or a deliberate review and matching process.
 
 ## Submission
 

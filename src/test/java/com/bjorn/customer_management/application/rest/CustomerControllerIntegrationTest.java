@@ -134,6 +134,60 @@ class CustomerControllerIntegrationTest {
 	}
 
 	@Test
+	void returnsEmptyCustomerList() throws Exception {
+		mockMvc.perform(get("/api/v1/customers"))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(JSON))
+				.andExpect(content().string("[]"));
+	}
+
+	@Test
+	void listsPostCreatedCustomersNewestFirstWithoutChangingStorage() throws Exception {
+		ObjectNode request = objectMapper.createObjectNode()
+				.put("firstName", " Viper ")
+				.put("lastName", " Napuatzi ")
+				.put("dateOfBirth", "1985-05-20");
+		MvcResult firstCreation = mockMvc.perform(post("/api/v1/customers")
+				.contentType(JSON)
+				.content(Objects.requireNonNull(objectMapper.writeValueAsString(request))))
+				.andExpect(status().isCreated())
+				.andReturn();
+		long firstId = objectMapper.readTree(firstCreation.getResponse().getContentAsString()).get("id").asLong();
+
+		request.put("firstName", "Deckard").put("lastName", "Cain").put("dateOfBirth", "1970-01-02");
+		MvcResult secondCreation = mockMvc.perform(post("/api/v1/customers")
+				.contentType(JSON)
+				.content(Objects.requireNonNull(objectMapper.writeValueAsString(request))))
+				.andExpect(status().isCreated())
+				.andReturn();
+		long secondId = objectMapper.readTree(secondCreation.getResponse().getContentAsString()).get("id").asLong();
+		assertTrue(secondId > firstId);
+		var storedCustomers = jdbcTemplate.queryForList("SELECT * FROM customers ORDER BY id");
+		assertEquals(2, storedCustomers.size());
+
+		MvcResult firstList = mockMvc.perform(get("/api/v1/customers"))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(JSON))
+				.andExpect(jsonPath("$.length()").value(2))
+				.andExpect(jsonPath("$[0].id").value(secondId))
+				.andExpect(jsonPath("$[0].firstName").value("Deckard"))
+				.andExpect(jsonPath("$[0].lastName").value("Cain"))
+				.andExpect(jsonPath("$[0].dateOfBirth").value("1970-01-02"))
+				.andExpect(jsonPath("$[1].id").value(firstId))
+				.andExpect(jsonPath("$[1].firstName").value("Viper"))
+				.andExpect(jsonPath("$[1].lastName").value("Napuatzi"))
+				.andExpect(jsonPath("$[1].dateOfBirth").value("1985-05-20"))
+				.andReturn();
+		MvcResult secondList = mockMvc.perform(get("/api/v1/customers"))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(JSON))
+				.andReturn();
+
+		assertEquals(firstList.getResponse().getContentAsString(), secondList.getResponse().getContentAsString());
+		assertEquals(storedCustomers, jdbcTemplate.queryForList("SELECT * FROM customers ORDER BY id"));
+	}
+
+	@Test
 	void returnsProblemDetailWhenCustomerIdDoesNotExist() throws Exception {
 		mockMvc.perform(get("/api/v1/customers/{id}", 999L))
 				.andExpect(status().isNotFound())

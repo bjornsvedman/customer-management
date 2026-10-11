@@ -1,7 +1,9 @@
 package com.bjorn.customer_management.infrastructure.persistence;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import com.bjorn.customer_management.domain.model.BirthDate;
@@ -36,9 +38,20 @@ public class CustomerPersistenceAdapter implements CustomerRepository {
 	@Override
 	public Optional<Customer> findById(CustomerId id) {
 		return springDataCustomerRepository.findById(id.value())
-				.map(entity -> Customer.reconstitute(
-						new CustomerId(entity.getId()),
-						new PersonName(entity.getFirstName(), entity.getLastName()),
-						new BirthDate(entity.getDateOfBirth())));
+				.map(this::toDomain);
+	}
+
+	@Override
+	public List<Customer> findAll() {
+		return springDataCustomerRepository.findAll(Sort.by("id").descending()).stream()
+				.map(this::toDomain)
+				.toList();
+	}
+
+	private Customer toDomain(CustomerJpaEntity entity) {
+		return Customer.reconstitute(
+				new CustomerId(entity.getId()),
+				new PersonName(entity.getFirstName(), entity.getLastName()),
+				new BirthDate(entity.getDateOfBirth()));
 	}
 }

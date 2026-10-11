@@ -1,6 +1,7 @@
 package com.bjorn.customer_management.application.rest;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.http.ResponseEntity;
@@ -45,5 +46,13 @@ public class CustomerController {
 	public ResponseEntity<CustomerResponse> getCustomer(@PathVariable long id) {
 		Customer customer = customerApplicationService.getCustomer(new CustomerId(id));
 		return ResponseEntity.ok(CustomerResponse.from(customer));
+	}
+
+	@GetMapping
+	public ResponseEntity<List<CustomerResponse>> getCustomers() {
+		List<CustomerResponse> responses = customerApplicationService.getCustomers().stream()
+				.map(CustomerResponse::from)
+				.toList();
+		return ResponseEntity.ok(responses);
 	}
 }

@@ -1,5 +1,7 @@
 package com.bjorn.customer_management.application;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,5 +28,10 @@ public class CustomerApplicationService {
 	public Customer getCustomer(CustomerId id) {
 		return customerRepository.findById(id)
 				.orElseThrow(() -> new CustomerNotFoundException(id.value()));
+	}
+
+	@Transactional(readOnly = true)
+	public List<Customer> getCustomers() {
+		return customerRepository.findAll();
 	}
 }

@@ -14,6 +14,7 @@ AI assistance:
 - Generated the initial pure-Java `CustomerId`, `PersonName`, and `BirthDate` value objects, the `Customer` aggregate, and focused JUnit tests. Updated birth-date validation and tests to use UTC.
 - Implemented the domain `CustomerRepository` contract, transactional application service, JPA entity and persistence adapter, validated POST DTO/controller, UTC validation clock, and RFC 7807 error handling for customer creation.
 - Added MockMvc integration tests that verify successful H2 persistence, generated IDs and `Location`, and that invalid requests do not persist.
+- Implemented `GET /api/v1/customers/{id}` through the domain repository contract, application service, persistence mapping, REST controller, and RFC 7807 handling for missing, malformed, and non-positive IDs. Added integration coverage that follows the POST response's `Location` with GET.
 
 Human-owned work:
 - Set the Spring Boot 3.x requirement, completed the earlier infrastructure work and commits, and chose Lightweight DDD as an intentional interview focus.
@@ -21,13 +22,14 @@ Human-owned work:
 
 ## Current Status
 
-The Java 21 toolchain and Spring Boot 3 setup are in place. The pure domain model, domain repository contract, create-customer application use case, H2 persistence adapter, and `POST /api/v1/customers` endpoint are implemented. Domain and full backend tests pass. Customer retrieval endpoints and the customer UI remain to be implemented.
+The Java 21 toolchain and Spring Boot 3 setup are in place. The pure domain model, H2 persistence adapter, `POST /api/v1/customers`, and `GET /api/v1/customers/{id}` are implemented. The customer-list endpoint and customer UI remain to be implemented.
 
 ## Validation
 
 - Confirmed the Gradle Java toolchain is configured for Java 21 and identified Temurin Java 21 on the machine.
 - `gradlew.bat help` and `gradlew.bat test` passed during the Spring Boot 3 infrastructure work.
 - The focused customer-domain JUnit tests and the full backend test suite passed with Java 21 selected through `JAVA_HOME`, including the UTC birth-date tests.
+- GET-by-ID integration tests and full backend test suite passed, Verified manually in Postman
 - Manually sent a valid `POST /api/v1/customers` request from Postman and confirmed the endpoint worked outside the automated test environment.
 - `npm --prefix frontend run lint` passed; no frontend files were changed during the domain work.
 - VS Code reported no diagnostics for the edited specification and domain files. Markdown checks for balanced fences, local links, and trailing whitespace passed.

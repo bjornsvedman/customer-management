@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -108,6 +109,56 @@ class CustomerControllerIntegrationTest {
 				"SELECT last_name FROM customers WHERE id = ?", String.class, customerId));
 		assertEquals(LocalDate.of(1985, 5, 20), jdbcTemplate.queryForObject(
 				"SELECT date_of_birth FROM customers WHERE id = ?", LocalDate.class, customerId));
+
+		mockMvc.perform(get(Objects.requireNonNull(location)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(customerId))
+				.andExpect(jsonPath("$.firstName").value("Viper"))
+				.andExpect(jsonPath("$.lastName").value("Napuatzi"))
+				.andExpect(jsonPath("$.dateOfBirth").value("1985-05-20"));
+	}
+
+	@Test
+	void getsPersistedCustomerById() throws Exception {
+		Customer persistedCustomer = customerRepository.save(Customer.create(
+				new PersonName("Viper", "Napuatzi"),
+				new BirthDate(LocalDate.of(1985, 5, 20))));
+		long customerId = persistedCustomer.id().orElseThrow().value();
+
+		mockMvc.perform(get("/api/v1/customers/{id}", customerId))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(customerId))
+				.andExpect(jsonPath("$.firstName").value("Viper"))
+				.andExpect(jsonPath("$.lastName").value("Napuatzi"))
+				.andExpect(jsonPath("$.dateOfBirth").value("1985-05-20"));
+	}
+
+	@Test
+	void returnsProblemDetailWhenCustomerIdDoesNotExist() throws Exception {
+		mockMvc.perform(get("/api/v1/customers/{id}", 999L))
+				.andExpect(status().isNotFound())
+				.andExpect(content().contentType(PROBLEM_JSON))
+				.andExpect(jsonPath("$.status").value(404))
+				.andExpect(jsonPath("$.title").value("Customer not found"));
+	}
+
+	@ParameterizedTest
+	@CsvSource({"abc", "9223372036854775808"})
+	void returnsProblemDetailWhenCustomerIdIsNotALong(String id) throws Exception {
+		mockMvc.perform(get("/api/v1/customers/{id}", id))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(PROBLEM_JSON))
+				.andExpect(jsonPath("$.status").value(400))
+				.andExpect(jsonPath("$.title").value("Invalid path parameter"));
+	}
+
+	@ParameterizedTest
+	@CsvSource({"0", "-1"})
+	void returnsProblemDetailWhenCustomerIdIsNotPositive(long id) throws Exception {
+		mockMvc.perform(get("/api/v1/customers/{id}", id))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(PROBLEM_JSON))
+				.andExpect(jsonPath("$.status").value(400));
 	}
 
 	@Test

@@ -7,9 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.bjorn.customer_management.application.CustomerNotFoundException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -47,5 +50,23 @@ public class ApiExceptionHandler {
 		problem.setTitle("Invalid customer");
 
 		return ResponseEntity.badRequest().body(problem);
+	}
+
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<ProblemDetail> handleTypeMismatch(MethodArgumentTypeMismatchException exception) {
+		ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+				HttpStatus.BAD_REQUEST,
+				"Customer ID must be a valid integer");
+		problem.setTitle("Invalid path parameter");
+
+		return ResponseEntity.badRequest().body(problem);
+	}
+
+	@ExceptionHandler(CustomerNotFoundException.class)
+	public ResponseEntity<ProblemDetail> handleCustomerNotFound(CustomerNotFoundException exception) {
+		ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+		problem.setTitle("Customer not found");
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
 	}
 }

@@ -67,10 +67,11 @@ These estimates were not measured with a timer.
 | Brief review, specification, and setup documentation | 20-35 min | 60-100 min |
 | Domain model, tests, and verification | 15-25 min | 45-75 min |
 | POST API, H2 persistence, and integration tests | 20-30 min | 60-90 min |
+| Customer lookup/list APIs, tests, and initial read-only UI | 30-45 min | 90-135 min |
 | Frontend customer creation, validation, tests, and polish | 45-75 min | 120-180 min |
 | Swagger/OpenAPI documentation and tests | 10-20 min | 30-50 min |
 | Final review, cleanup, and documentation polish | 20-30 min | 45-75 min |
-| **Estimated total** | **145-240 min** | **410-655 min** |
+| **Estimated total** | **175-285 min** | **500-790 min** |
 
 ## Reflection
 

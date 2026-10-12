@@ -90,6 +90,10 @@ Keep the dependency direction `REST / infrastructure -> application -> domain`. 
 
 This is Lightweight DDD, not a requirement to add ceremony: introduce only the domain types and boundaries needed to protect the customer rules and make the use cases testable.
 
+## Operational Scope
+
+Spring Boot Actuator is included as a foundation for health checks and metrics. External metrics collection, dashboards, alerting, distributed tracing, and production management-endpoint security configuration are outside this assignment's scope.
+
 ## Verification and Acceptance Criteria
 
 The work is complete when:

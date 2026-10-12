@@ -8,6 +8,8 @@ import java.time.ZoneOffset;
 
 import org.junit.jupiter.api.Test;
 
+import com.bjorn.customer_management.domain.exception.DomainValidationException;
+
 class BirthDateTest {
 	@Test
 	void acceptsDateInThePast() {
@@ -20,8 +22,8 @@ class BirthDateTest {
 	void rejectsTodayAndFutureDates() {
 		LocalDate today = LocalDate.now(ZoneOffset.UTC);
 
-		assertThrows(IllegalArgumentException.class, () -> new BirthDate(today));
-		assertThrows(IllegalArgumentException.class, () -> new BirthDate(today.plusDays(1)));
+		assertThrows(DomainValidationException.class, () -> new BirthDate(today));
+		assertThrows(DomainValidationException.class, () -> new BirthDate(today.plusDays(1)));
 	}
 
 	@Test

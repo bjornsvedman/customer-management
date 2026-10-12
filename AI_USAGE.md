@@ -20,6 +20,7 @@ AI assistance:
 - Added the customer creation form and typed POST request, pending-submit guard, success-only clearing, preserved entries on failure, and post-creation list refresh with stale-read cancellation. Added Vitest, Testing Library, and jsdom for focused creation tests.
 - Added client-side name and UTC birth-date validation, backend field-error messages, clearer general/network/timeout errors, accessible field descriptions and focus, and tests for invalid input and corrected submissions.
 - Added springdoc-openapi Swagger UI and OpenAPI 3 documentation for customer operations, request/response schemas, and RFC 7807 field-validation errors, with integration tests for the generated document and UI route.
+- Replaced broad `IllegalArgumentException` HTTP classification with a domain-specific validation exception and a generic safe `500` response. Added focused tests to preserve Spring's standard `404`, `405`, and `415` handling.
 
 Human-owned work:
 - Set the Spring Boot 3.x requirement, completed the earlier infrastructure work and commits, and chose Lightweight DDD as an intentional interview focus.
@@ -29,7 +30,7 @@ Human-owned work:
 
 ## Current Status
 
-The Java 21 toolchain and Spring Boot 3 setup are in place. The pure domain model, H2 persistence adapter, `POST /api/v1/customers`, `GET /api/v1/customers/{id}`, and `GET /api/v1/customers` are implemented. The customer list and creation form include client validation, backend field errors, accessible feedback, and responsive layout. Swagger UI and the generated OpenAPI document cover all customer operations and their response schemas.
+The Java 21 toolchain and Spring Boot 3 setup are in place. The pure domain model, H2 persistence adapter, `POST /api/v1/customers`, `GET /api/v1/customers/{id}`, and `GET /api/v1/customers` are implemented. The customer list and creation form include client validation, backend field errors, accessible feedback, and responsive layout. Swagger UI and the generated OpenAPI document cover all customer operations and their response schemas. Domain validation has a dedicated HTTP mapping, and unexpected failures return a generic Problem Detail response.
 
 ## Validation
 
@@ -38,11 +39,12 @@ The Java 21 toolchain and Spring Boot 3 setup are in place. The pure domain mode
 - The focused customer-domain JUnit tests and the full backend test suite passed with Java 21 selected through `JAVA_HOME`, including the UTC birth-date tests.
 - GET-by-ID integration tests and full backend test suite passed, Verified manually in Postman
 - The focused customer-list integration tests and full `gradlew.bat test` suite passed after implementing descending ID order. The tests verify `200` JSON responses, empty arrays, all persisted customer fields, newest-first ordering, and unchanged storage after repeated GET requests.
-- Frontend lint and production build passed for the read-only customer screen. Playwright checks with intercepted API responses verified initial loading, populated and empty lists, retained rows during refresh/failure, disabled overlapping refresh, retry recovery, and long-name wrapping at desktop/mobile sizes. Screenshots were inspected and button/secondary-text contrast checked. The live API request through the proxy returned HTTP 500, so successful live backend-to-UI retrieval remains unverified; the UI showed its error state correctly.
+- Frontend lint and production build passed for the read-only customer screen. Playwright checks with intercepted API responses verified initial loading, populated and empty lists, retained rows during refresh/failure, disabled overlapping refresh, retry recovery, and long-name wrapping at desktop/mobile sizes. Screenshots were inspected and button/secondary-text contrast checked. An initial live API request returned HTTP 500; restarting the backend resolved it, and a later live UI creation was verified below.
 - Frontend slice: Create Customers, AI ran the frontend checks and tested customer creation and recovery. I also added a customer manually and confirmed it appeared in the list.
 - Frontend slice: Validation And Polish, AI ran lint, build, and 32 tests. Browser checks covered clear field errors, keyboard focus, mobile layout, and failure recovery using simulated API responses. Live customer-list loading also succeeded; no live creation was performed during this slice's automated checks.
 - Final live acceptance check: Submitted a customer through the UI and confirmed it appeared first in the list without a page reload and the form cleared. Backend and frontend test suites passed.
 - Swagger verification: The full backend test suite passed, including MockMvc checks for all OpenAPI operation paths, success/error responses, the validation-error schema, and Swagger UI HTML. Opened the live UI on port 8081 and confirmed all three customer operations and schemas render.
+- Error-classification verification: The focused domain and REST tests and the full backend suite passed. Tests confirm domain validation returns `400`, unexpected exceptions return a generic `500` without exposing exception text, and framework `404`, `405`, and `415` responses remain intact.
 - Manually sent a valid `POST /api/v1/customers` request from Postman and confirmed the endpoint worked outside the automated test environment.
 - `npm --prefix frontend run lint` passed; no frontend files were changed during the domain work.
 - VS Code reported no diagnostics for the edited specification and domain files. Markdown checks for balanced fences, local links, and trailing whitespace passed.
@@ -67,10 +69,15 @@ These estimates were not measured with a timer.
 | POST API, H2 persistence, and integration tests | 20-30 min | 60-90 min |
 | Frontend customer creation, validation, tests, and polish | 45-75 min | 120-180 min |
 | Swagger/OpenAPI documentation and tests | 10-20 min | 30-50 min |
-| **Estimated total** | **125-210 min** | **365-580 min** |
+| Final review, cleanup, and documentation polish | 20-30 min | 45-75 min |
+| **Estimated total** | **145-240 min** | **410-655 min** |
 
 ## Reflection
 
 Java and infrastructure setup is a recurring source of wasted engineering time: developers can spend hours tracing `JAVA_HOME`, `PATH`, multiple installed JDKs, Gradle toolchain requirements, and incompatible framework versions. This project encountered that same category of problem: Java 25 was active while the build required Java 21. AI helped narrow the diagnosis and guide verification, but checking the actual installation path and running the tests were still necessary. More broadly, AI accelerated boilerplate, documentation, and test setup; human judgment remained essential for the architecture, scope, and deciding which suggestions conflicted with the brief or Lightweight DDD goals.
 
 This project has also been an excellent opportunity to explore building an AI-first greenfield application. Early on, I got carried away by that opportunity and moved away from my usual incremental process. As a result, some initial commits became larger and less focused than I would have liked. I’ve recognized that, and I’m applying a more deliberate, step-by-step approach as the implementation continues.
+
+Actuator provides a foundation for health checks and metrics, but its inclusion does not mean operational monitoring is complete. Metrics collection, dashboards, protected management access, and actionable alerts remain unconfigured and are deliberately outside this assignment’s scope.
+
+I treated error handling as part of the API contract, not just controller plumbing. Expected client errors such as invalid fields, malformed requests, invalid IDs, and missing customers should return clear, stable `4xx` responses; unexpected failures should return a generic `500` without exposing internal details. I deferred correlation IDs, extensive logging, and a full monitoring setup. In a deployed banking service, I would align diagnostics, privacy controls, monitoring, and API standards with the organisation's existing platform, security, and compliance practices. Actuator is a starting point.

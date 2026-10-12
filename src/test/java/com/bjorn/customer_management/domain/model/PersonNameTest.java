@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import com.bjorn.customer_management.domain.exception.DomainValidationException;
+
 class PersonNameTest {
 	@Test
 	void trimsAndAcceptsValidNames() {
@@ -23,13 +25,13 @@ class PersonNameTest {
 
 	@Test
 	void rejectsBlankNames() {
-		assertThrows(IllegalArgumentException.class, () -> new PersonName(" ", "Napuatzi"));
-		assertThrows(IllegalArgumentException.class, () -> new PersonName("Viper", "\t"));
+		assertThrows(DomainValidationException.class, () -> new PersonName(" ", "Napuatzi"));
+		assertThrows(DomainValidationException.class, () -> new PersonName("Viper", "\t"));
 	}
 
 	@Test
 	void rejectsNamesLongerThanMaximumLength() {
-		assertThrows(IllegalArgumentException.class, () -> new PersonName("a".repeat(51), "Napuatzi"));
-		assertThrows(IllegalArgumentException.class, () -> new PersonName("Viper", "n".repeat(51)));
+		assertThrows(DomainValidationException.class, () -> new PersonName("a".repeat(51), "Napuatzi"));
+		assertThrows(DomainValidationException.class, () -> new PersonName("Viper", "n".repeat(51)));
 	}
 }

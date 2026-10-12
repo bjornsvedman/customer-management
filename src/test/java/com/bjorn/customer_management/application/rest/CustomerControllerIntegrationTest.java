@@ -71,9 +71,12 @@ class CustomerControllerIntegrationTest {
 				.andExpect(jsonPath("$.info.title").value("Customer Management API"))
 				.andExpect(jsonPath("$.paths['/api/v1/customers'].post.responses['201']").exists())
 				.andExpect(jsonPath("$.paths['/api/v1/customers'].post.responses['400']").exists())
+				.andExpect(jsonPath("$.paths['/api/v1/customers'].post.responses['500']").exists())
 				.andExpect(jsonPath("$.paths['/api/v1/customers'].get.responses['200']").exists())
+				.andExpect(jsonPath("$.paths['/api/v1/customers'].get.responses['500']").exists())
 				.andExpect(jsonPath("$.paths['/api/v1/customers/{id}'].get.responses['200']").exists())
 				.andExpect(jsonPath("$.paths['/api/v1/customers/{id}'].get.responses['404']").exists())
+				.andExpect(jsonPath("$.paths['/api/v1/customers/{id}'].get.responses['500']").exists())
 				.andExpect(jsonPath("$.components.schemas.ApiProblemDetail.properties.errors.items.$ref").value("#/components/schemas/ApiFieldError"))
 				.andExpect(jsonPath("$.components.schemas.CreateCustomerRequest.properties.dateOfBirth.format").value("date"))
 				.andReturn();

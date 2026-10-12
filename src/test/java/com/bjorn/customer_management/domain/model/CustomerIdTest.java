@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import com.bjorn.customer_management.domain.exception.DomainValidationException;
+
 class CustomerIdTest {
 	@Test
 	void acceptsPositiveValue() {
@@ -13,7 +15,7 @@ class CustomerIdTest {
 
 	@Test
 	void rejectsZeroAndNegativeValues() {
-		assertThrows(IllegalArgumentException.class, () -> new CustomerId(0L));
-		assertThrows(IllegalArgumentException.class, () -> new CustomerId(-1L));
+		assertThrows(DomainValidationException.class, () -> new CustomerId(0L));
+		assertThrows(DomainValidationException.class, () -> new CustomerId(-1L));
 	}
 }

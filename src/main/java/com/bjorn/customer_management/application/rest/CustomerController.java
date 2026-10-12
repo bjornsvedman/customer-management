@@ -50,6 +50,8 @@ public class CustomerController {
 					headers = @Header(name = "Location", description = "URI of the created customer", schema = @Schema(type = "string", example = "/api/v1/customers/1")),
 					content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomerResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Request is malformed or contains invalid customer fields",
+					content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ApiProblemDetail.class))),
+			@ApiResponse(responseCode = "500", description = "Unexpected server error",
 					content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ApiProblemDetail.class)))
 	})
 	public ResponseEntity<CustomerResponse> createCustomer(@Valid @RequestBody CreateCustomerRequest request) {
@@ -70,6 +72,8 @@ public class CustomerController {
 			@ApiResponse(responseCode = "400", description = "Customer ID is invalid",
 					content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ApiProblemDetail.class))),
 			@ApiResponse(responseCode = "404", description = "Customer not found",
+					content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ApiProblemDetail.class))),
+			@ApiResponse(responseCode = "500", description = "Unexpected server error",
 					content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ApiProblemDetail.class)))
 	})
 	public ResponseEntity<CustomerResponse> getCustomer(
@@ -83,7 +87,9 @@ public class CustomerController {
 	@Operation(summary = "List customers", description = "Returns all customers in descending ID order, newest first.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "Customers returned, possibly an empty list",
-					content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = CustomerResponse.class))))
+						content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = CustomerResponse.class)))),
+				@ApiResponse(responseCode = "500", description = "Unexpected server error",
+						content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ApiProblemDetail.class)))
 	})
 	public ResponseEntity<List<CustomerResponse>> getCustomers() {
 		List<CustomerResponse> responses = customerApplicationService.getCustomers().stream()

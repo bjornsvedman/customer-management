@@ -17,7 +17,7 @@ Out of scope: editing or deleting customers, authentication, search, pagination,
 
 ## Selected Stack
 
-The brief prefers Kotlin, Spring Boot 3.x, React 19 with TypeScript, and H2, while explicitly allowing Java and acceptable embedded/in-memory alternatives. This repository is already scaffolded for Java 21, Spring Boot 3.5, Gradle, React 19, TypeScript, Vite, and H2; retain that compatible stack rather than restarting in a different language. Use the existing Spring Data JPA setup for persistence.
+The brief prefers Kotlin, Spring Boot 3.x, React 19 with TypeScript, and H2, while explicitly allowing Java and acceptable embedded/in-memory alternatives. This repository is already scaffolded for Java 21, Spring Boot 3.5, Gradle, React 19, TypeScript, Vite, and H2; retain that compatible stack rather than restarting in a different language. Use the existing Spring Data JPA setup for persistence and springdoc-openapi for API documentation.
 
 ## Domain and Validation Rules
 
@@ -31,6 +31,8 @@ The brief prefers Kotlin, Spring Boot 3.x, React 19 with TypeScript, and H2, whi
 ## HTTP API
 
 Base path: `/api/v1/customers`.
+
+Document the customer API using OpenAPI 3. The Swagger UI is available at `/swagger-ui/index.html`, and the generated OpenAPI document is available at `/v3/api-docs`. Document the create, retrieve, and list operations, including request and response schemas, status codes, and RFC 7807 error responses with the field-validation `errors` extension. The `/v3/api-docs` path refers to the OpenAPI document format and does not change the customer API's `/v1` version.
 
 ### Create a customer
 
@@ -93,6 +95,7 @@ This is Lightweight DDD, not a requirement to add ceremony: introduce only the d
 The work is complete when:
 - A user can create a valid customer in the UI and see it in the customer list.
 - A created customer can be retrieved through the API, and the list remains available across requests.
+- Swagger UI and the generated OpenAPI document load successfully and describe all customer operations, request and response schemas, and documented error responses.
 - Invalid names and invalid, missing, or future dates are rejected with a useful `400` response; an unknown customer ID returns `404`.
 - Domain tests run without a Spring context and cover value-object and aggregate invariants; Spring/MockMvc tests cover creation, retrieval, persistence mapping, validation, and error responses.
 - The domain remains framework-independent, repositories speak domain types, application services orchestrate use cases and transactions, and persistence/REST concerns stay in their adapters.

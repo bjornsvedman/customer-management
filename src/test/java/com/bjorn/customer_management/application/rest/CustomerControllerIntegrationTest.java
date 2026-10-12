@@ -64,6 +64,32 @@ class CustomerControllerIntegrationTest {
 	}
 
 	@Test
+	void servesOpenApiDocumentForCustomerOperations() throws Exception {
+		MvcResult result = mockMvc.perform(get("/v3/api-docs"))
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(JSON))
+				.andExpect(jsonPath("$.info.title").value("Customer Management API"))
+				.andExpect(jsonPath("$.paths['/api/v1/customers'].post.responses['201']").exists())
+				.andExpect(jsonPath("$.paths['/api/v1/customers'].post.responses['400']").exists())
+				.andExpect(jsonPath("$.paths['/api/v1/customers'].get.responses['200']").exists())
+				.andExpect(jsonPath("$.paths['/api/v1/customers/{id}'].get.responses['200']").exists())
+				.andExpect(jsonPath("$.paths['/api/v1/customers/{id}'].get.responses['404']").exists())
+				.andExpect(jsonPath("$.components.schemas.ApiProblemDetail.properties.errors.items.$ref").value("#/components/schemas/ApiFieldError"))
+				.andExpect(jsonPath("$.components.schemas.CreateCustomerRequest.properties.dateOfBirth.format").value("date"))
+				.andReturn();
+
+		JsonNode openApi = objectMapper.readTree(result.getResponse().getContentAsString());
+		assertTrue(openApi.get("openapi").asText().startsWith("3."));
+	}
+
+	@Test
+	void servesSwaggerUi() throws Exception {
+		mockMvc.perform(get("/swagger-ui/index.html"))
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML));
+	}
+
+	@Test
 	void rejectsAlreadyPersistedCustomerWithoutInsertingAnotherRow() {
 		Customer customer = Customer.create(
 				new PersonName("Viper", "Napuatzi"),

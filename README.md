@@ -23,7 +23,7 @@ npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. The frontend uses a `/api` development proxy to reach Spring Boot at `http://localhost:8080` and supports creating customers and displaying the list with a refresh/retry control. Confirmed creation clears the form and refreshes the newest-first list. Failed submissions retain entered values and existing records; a failed refresh after creation can be retried without another POST. Names and birth dates are validated before submission, and backend field errors appear beside their inputs. Network failures and timeouts show separate messages. The API base path is `/api/v1/customers`. H2 is in-memory, so records are cleared when the backend stops.
+Open the local URL printed by Vite. The frontend uses a `/api` development proxy to reach Spring Boot at `http://localhost:8080` and supports creating customers and displaying the list with a refresh/retry control. Confirmed creation clears the form and refreshes the newest-first list. Failed submissions retain entered values and existing records; a failed refresh after creation can be retried without another POST. Names and birth dates are validated before submission, and backend field errors appear beside their inputs. Network failures and timeouts show separate messages. The API base path is `/api/v1/customers`. Browse the API documentation at `http://localhost:8080/swagger-ui/index.html`; its OpenAPI JSON is at `http://localhost:8080/v3/api-docs`. H2 is in-memory, so records are cleared when the backend stops.
 
 ## Verify
 

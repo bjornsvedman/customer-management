@@ -1,18 +1,18 @@
 # Customer Management
 
-A full-stack customer management application built for the Senior Full Stack Technical Test. The project uses Java 21, Spring Boot, H2, React 19, TypeScript, and Vite. See [`SPEC.md`](SPEC.md) for the functional contract, API, validation rules, and acceptance criteria; see [`AI_USAGE.md`](AI_USAGE.md) for the engineering and AI-use log.
+A full-stack customer management application built for the Senior Full Stack Technical Test. It uses Java 21, Spring Boot 3.5, H2, React 19, TypeScript, and Vite. See [`SPEC.md`](SPEC.md) for the detailed functional and API contract, and [`AI_USAGE.md`](AI_USAGE.md) for the AI-use and engineering log.
 
 ## Prerequisites
 
-- JDK 21
-- Node.js and npm versions supported by the Vite version in `frontend/package.json`
+- JDK 21.
+- Node.js 24.21.0 was used to verify the frontend.
 
 ## Run Locally
 
-Start the backend from the repository root:
+Start the backend from the repository root. On Windows PowerShell:
 
 ```powershell
-./gradlew.bat bootRun
+.\gradlew.bat bootRun
 ```
 
 In a second terminal, install frontend dependencies and start Vite:
@@ -23,38 +23,48 @@ npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. The frontend uses a `/api` development proxy to reach Spring Boot at `http://localhost:8080` and supports creating customers and displaying the list with a refresh/retry control. Confirmed creation clears the form and refreshes the newest-first list. Failed submissions retain entered values and existing records; a failed refresh after creation can be retried without another POST. Names and birth dates are validated before submission, and backend field errors appear beside their inputs. Network failures and timeouts show separate messages. The API base path is `/api/v1/customers`. Browse the API documentation at `http://localhost:8080/swagger-ui/index.html`; its OpenAPI JSON is at `http://localhost:8080/v3/api-docs`. H2 is in-memory, so records are cleared when the backend stops.
+Open the local URL printed by Vite. Its `/api` development proxy forwards requests to Spring Boot at `http://localhost:8080`.
+
+The API base path is `http://localhost:8080/api/v1/customers`.
+Swagger UI is available at `http://localhost:8080/swagger-ui/index.html`
+OpenAPI document at `http://localhost:8080/v3/api-docs`.
+
+H2 is in-memory: records remain available across requests while the backend runs and are cleared when it stops.
+
+### Smoke Check
+
+1. Open the UI, create a customer with a past birth date, and confirm it appears first in the list.
+2. Refresh the page and confirm the record remains while the backend is still running.
+3. Open the Swagger UI and try retrieving the created customer by its ID.
 
 ## Verify
 
 Run backend tests from the repository root:
 
 ```powershell
-./gradlew.bat test
+.\gradlew.bat test
 ```
 
-Run frontend checks from `frontend/`:
+Run frontend checks from the repository root:
 
 ```powershell
+cd frontend
 npm run lint
 npm run build
 npm test
 ```
 
-Frontend creation and validation tests use Vitest, Testing Library, and jsdom. API calls are mocked in form tests. Live integration additionally requires the backend to be running successfully.
-
 ## Design Decisions
 
-- Use the repository's existing Java 21, Spring Boot 3.5, Gradle, React 19, TypeScript, Vite, and H2 stack, all compatible with the brief's preferences or accepted alternatives.
-- Keep domain rules independent from Spring and persistence; map domain objects to JPA entities and API records at their respective boundaries.
-- Use H2 in-memory persistence to satisfy the brief's lightweight persistence requirement; durable storage is intentionally out of scope.
-- Return customers ordered by descending ID so that after creation and a list refresh, the newest customer appears first and is easy to confirm. (Spec Change)
-- Validate customer names and birth dates at the API and domain boundaries, return RFC 7807 problem responses for expected API errors, and cover behavior with focused backend and frontend checks.
+- **Java instead of Kotlin:** I chose Java because I have more experience with it and could work more effectively within the assignment's timebox.
+- **Lightweight DDD:** I chose Lightweight DDD to keep the core business rules independent of frameworks and persistence. Keeping the domain independent makes its business rules straightforward to test without infrastructure.
+- **Validation at boundaries:** Request validation gives API callers useful field-level feedback; domain validation protects invariants for callers that bypass REST.
+- **In-memory persistence:** H2 satisfies the assignment and makes local setup straightforward.
+- **Newest-first ordering:** The list is ordered by descending generated ID so a newly created customer is immediately visible after refresh.
+- **Error handling and tests:** I treated error classification as part of the API contract. Known domain-validation failures return 400 responses, while unexpected application or infrastructure failures return a generic 500. This prevents server faults from being misreported as client mistakes and avoids exposing internal details. Focused tests cover both outcomes and preserve Spring’s standard error responses.
+- **Date-only values:** Birth date is a calendar date, not a timestamp, so the app preserves it without timezone conversion.
 
 ## Production Considerations
 
-- Duplicate prevention is not implemented. Name and date of birth alone cannot reliably identify a person, so rejecting matching records could block legitimate customers. A production system would need an agreed identity key or a deliberate review and matching process.
-
-## Submission
-
-The interview brief requests a Git bundle containing the repository history. Commit the completed work before creating the bundle, then follow the command in [`SPEC.md`](SPEC.md) and verify the bundle.
+- This is an assessment application, not a deployable banking service. Authentication and authorization, privacy and retention controls for personal data, durable storage, production management-endpoint security, and configured monitoring/alerting are outside scope and would need to be addressed before deployment.
+- Duplicate prevention is not implemented. Name and date of birth alone cannot reliably identify a person, so rejecting matching records could block legitimate customers. A production design would require an agreed identity key or a deliberate review and matching process.

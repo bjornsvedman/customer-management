@@ -1,0 +1,12 @@
+.git
+.github
+.gradle
+.idea
+.vscode
+.build-ca.*
+build
+bin
+frontend
+docs
+dist
+*.log
